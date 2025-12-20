@@ -1,5 +1,21 @@
-# kvantorium-eco-project
+# Проет по Распознавание составных объектов на водных акваториях с использованием методов компьютерного зрения
 
-## Install packages
+## Установите пакеты, необходимые для работы
 
-1. ultralytics, run `pip install ultralytics`
+1. Установите ultralytics, выполните в терминале `pip install ultralytics`
+2. Обучите Yolo мрдель, посетите для докуметнации [клик](https://docs.ultralytics.com/yolov8/)
+
+## Обучение
+
+Датасеты (datasets) вы можете найти на сайте Roboflow или создать сами
+
+## Использование
+
+Создайте и задайте конфиг `params.txt` файл, следуя, данной ниже, инструкции:
+
+```
+overlap_threshold = 0.0 < x > 1.0, default x: 0.5
+probs_threshold = 0.0 < x > 1.0, default x: 0.5
+```
+
+Далее выполните `python ./main.py` и все готово!
