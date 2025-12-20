@@ -3,25 +3,27 @@ from datetime import datetime
 import cv2
 from ultralytics import YOLO
 
-from constants import classes
-from json_utils import add_overlap_object, restart_json
-from utils import get_the_biggest, rectangle_overlap_percentage
+from modules.constants import classes
+from modules.json_utils import add_overlap_object, restart_json, restart_txt
+from modules.utils import get_the_biggest, rectangle_overlap_percentage
 
 restart_json("output.json")
+restart_txt("output.txt")
 
-overlap_threshold = input("Enter overlap threshold (default: 0.5): ")
-if overlap_threshold.isdigit():
-    overlap_threshold = float(overlap_threshold)
-else:
-    print("Invalid input for overlap threshold. Using default value of 0.5.")
-    overlap_threshold = 0.5
+overlap_threshold = 0.5
+probs_threshold = 0.5
 
-# Load the YOLO11 model
-boat_model = YOLO("runs/detect/kaka2/weights/best.pt")
-human_model = YOLO("runs/detect/train/weights/best.pt")
+with open("params.txt", "r", encoding="utf-8") as file:
+    params = file.read().splitlines()
+    overlap_threshold = float(params[0].split(" = ")[1])
+    probs_threshold = float(params[1].split(" = ")[1])
+
+# Load the YOLO8 model
+boat_model = YOLO("runs/detect/boat/weights/best.pt")
+human_model = YOLO("runs/detect/human/weights/best.pt")
 
 # Open the video file
-# video_path = "./assets/videos/walking-human-1.mp4"
+# video_path = "./assets/images/man-and-boat-1.jpg"
 video_path = "./assets/videos/human-and-boat.mp4"
 cap = cv2.VideoCapture(video_path)
 
@@ -35,9 +37,19 @@ while cap.isOpened():
 
     current_frame_id = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
 
-    # Run YOLO11 tracking on the frame, persisting tracks between frames
+    # Run YOLO8 tracking on the frame, persisting tracks between frames
     boat_box = boat_model.predict(frame)
     human_box = human_model.predict(frame)
+
+    boat_probs_array = boat_box[0].boxes.conf
+    human_probs_array = human_box[0].boxes.conf
+
+    boat_probs = (
+        round(float(boat_probs_array[0]), 3) if len(boat_probs_array) > 0 else 0
+    )
+    human_probs = (
+        round(float(human_probs_array[0]), 3) if len(human_probs_array) > 0 else 0
+    )
 
     boat_xy = boat_box[0].boxes.xyxy
     human_xy = human_box[0].boxes.xyxy
@@ -71,16 +83,36 @@ while cap.isOpened():
     for boat in boat_xy:
         for human in human_xy:
             overlap_percentage = rectangle_overlap_percentage(boat, human)
-            if overlap_percentage > overlap_threshold:
-                with open("output.txt", "a") as file:
+            avg_probability = round((boat_probs + human_probs) / 2, 3)
+
+            if (
+                overlap_percentage >= overlap_threshold
+                and avg_probability >= probs_threshold
+            ):
+                with open("output.txt", "a", encoding="utf-8") as file:
                     file.write(f"{overlap_percentage * 100:.2f}%\n")
+
+                bbox = [
+                    int(max(boat[0], human[0])),
+                    int(max(boat[1], human[1])),
+                    int(min(boat[2], human[2])),
+                    int(min(boat[3], human[3])),
+                ]
+                mask = [
+                    [bbox[0], bbox[1]],
+                    [bbox[2], bbox[1]],
+                    [bbox[2], bbox[3]],
+                    [bbox[0], bbox[3]],
+                ]
+
                 add_overlap_object(
                     {
                         "track_id": current_frame_id,
                         "class": {"id": 2, "name": classes[2]},
                         "scores": float(f"{overlap_percentage:.3f}"),
-                        "bbox": [620, 370, 710, 460],
-                        "mask": [[[620, 370], [710, 370], [710, 460], [620, 460]]],
+                        "probability": avg_probability,
+                        "bbox": bbox,
+                        "mask": mask,
                         "timestamp": datetime.now().isoformat(),
                     },
                     "output.json",

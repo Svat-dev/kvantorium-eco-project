@@ -42,6 +42,10 @@ def get_the_biggest():
     maximum = 0
     with open("output.txt", "r") as file:
         content = file.read().split("\n")
+
+        if not content:
+            return
+
         for line in content:
             if line:
                 value = float(line.replace("%", ""))
