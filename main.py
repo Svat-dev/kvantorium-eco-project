@@ -90,7 +90,9 @@ while cap.isOpened():
                 and avg_probability >= probs_threshold
             ):
                 with open("output.txt", "a", encoding="utf-8") as file:
-                    file.write(f"{overlap_percentage * 100:.2f}%\n")
+                    file.write(
+                        f"{overlap_percentage * 100:.2f}% -- {avg_probability * 100:.2f}%\n"
+                    )
 
                 bbox = [
                     int(max(boat[0], human[0])),

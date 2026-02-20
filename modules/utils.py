@@ -39,7 +39,7 @@ def rectangle_overlap_percentage(rect_a, rect_b):
 
 
 def get_the_biggest():
-    maximum = 0
+    maximum_overlap, maximum_probability = 0, 0
     with open("output.txt", "r") as file:
         content = file.read().split("\n")
 
@@ -48,10 +48,15 @@ def get_the_biggest():
 
         for line in content:
             if line:
-                value = float(line.replace("%", ""))
-                maximum = max(maximum, value)
+                overlap, probability = line.split(" -- ")
+                overlap_value = float(overlap.replace("%", ""))
+                probability_value = float(probability.replace("%", ""))
+
+                maximum_overlap = max(maximum_overlap, overlap_value)
+                maximum_probability = max(maximum_probability, probability_value)
     with open("output.txt", "a") as file:
-        file.write(f"Max value: {maximum}%\n")
+        file.write(f"Max overlap : {maximum_overlap}%\n")
+        file.write(f"Max probability : {maximum_probability}%\n")
 
 
 # # Пример использования
