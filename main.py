@@ -23,8 +23,8 @@ boat_model = YOLO("runs/detect/boat/weights/best.pt")
 human_model = YOLO("runs/detect/human/weights/best.pt")
 
 # Open the video file
-# video_path = "./assets/images/man-and-boat-1.jpg"
-video_path = "./assets/videos/human-and-boat.mp4"
+video_path = "./assets/videos/human-in-boat.mp4"
+# video_path = "./assets/videos/human-and-boat.mp4"zz
 cap = cv2.VideoCapture(video_path)
 
 # Loop through the video frames
