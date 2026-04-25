@@ -3,7 +3,7 @@
 ## Установите пакеты, необходимые для работы
 
 1. Создайте venv (Virtual Environment), по желанию
-2. Установите ultralytics, выполните в терминале `pip install ultralytics`
+2. Установите ultralytics, выполните в терминале `pip install requirements.txt`
 3. Обучите Yolo мрдель, посетите для докуметнации [клик](https://docs.ultralytics.com/yolov8/), см. Обучение
 
 ## Обучение
